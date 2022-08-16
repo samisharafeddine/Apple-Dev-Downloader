@@ -10,7 +10,7 @@ import Foundation
 
 class DownloadProcess {
     //MARK: - private properties
-    private let process: Process!
+    private var process: Process?
     
     //MARK: - public properties
     let url: String!
@@ -19,27 +19,47 @@ class DownloadProcess {
     
     //MARK: - computed properties
     var isRunning: Bool {
-        return process.isRunning
+        return process?.isRunning ?? false
     }
     
-    var launchPath: String? {
-        get { return process.launchPath }
-        set { process.launchPath = newValue }
+    var executableURL: URL? {
+        get {
+            checkProcess()
+            return process?.executableURL
+        }
+        set {
+            process?.executableURL = newValue
+        }
     }
     
     var arguments: [String]? {
-        get { return process.arguments }
-        set { process.arguments = newValue }
+        get {
+            checkProcess()
+            return process?.arguments
+        }
+        set {
+            process?.arguments = newValue
+        }
     }
     
     var standardOutput: Any? {
-        get { return process.standardOutput }
-        set { process.standardOutput = newValue }
+        get {
+            checkProcess()
+            return process?.standardOutput
+        }
+        set {
+            process?.standardOutput = newValue
+        }
     }
     
     var standardError: Any? {
-        get { return process.standardError }
-        set { process.standardError = newValue }
+        get {
+            checkProcess()
+            return process?.standardError
+        }
+        set {
+            process?.standardError = newValue
+        }
     }
     
     //MARK: - Init
@@ -49,12 +69,23 @@ class DownloadProcess {
         self.process = Process()
     }
     
-    //MARK: - function
-    func terminate() {
-        process.terminate()
+    private func checkProcess() {
+        if process == nil {
+            process = Process()
+        }
     }
     
-    func launch() {
-        process.launch()
+    //MARK: - function
+    func terminate() {
+        process?.terminate()
+        process = nil
+    }
+    
+    func run() {
+        do {
+            try process?.run()
+        } catch let error {
+            print("An error occured while trying to run task: \(error.localizedDescription)")
+        }
     }
 }
