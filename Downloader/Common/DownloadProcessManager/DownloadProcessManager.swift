@@ -95,7 +95,8 @@ class DownloadProcessManager {
         }
         
         //Set launch path and arguments
-        currentDownloadProcess.launchPath = launchPath
+        let launchPathUrl = URL(fileURLWithPath: launchPath)
+        currentDownloadProcess.executableURL = launchPathUrl
         currentDownloadProcess.arguments = launchArguments
         
         //set standard ourput pipe
@@ -118,7 +119,7 @@ class DownloadProcessManager {
             if outputData.count > 0, let outputString = String.init(data: outputData, encoding: .utf8) {
                 //update progress
                 let parsedOutput = Aria2cParser.parse(string: outputString)
-                if (parsedOutput.error?.count ?? 0) > 0 {
+                if let error = parsedOutput.error, !error.isEmpty {
                     currentDownloadProcess.progress = DownloadProgress(fileName: fullFileName, output: parsedOutput, isFinish: true)
                     completeDownloadProcess(currentDownloadProcess, output: parsedOutput)
                     triggerOutputStream(parsedOutput)
@@ -135,7 +136,7 @@ class DownloadProcessManager {
         }
         
         //launch download process
-        currentDownloadProcess.launch()
+        currentDownloadProcess.run()
         
         //trigger downnload start
         triggerDownloadStart(downloadFileURLString)
